@@ -1,6 +1,7 @@
 const router = require('express').Router();
+const { getBusesWithRequestedSeats, addBus } = require("../controllers/busControllers.js")
 
-app.get("/available/:seats", (req, res) => { getAvailableSeates(req, res) });
-app.post("/", (req, res) => { addBus(req, res) });
+router.get("/available/:seats", (req, res) => { getBusesWithRequestedSeats(req, res) });
+router.post("/", (req, res) => { addBus(req, res) });
 
 module.exports = router;

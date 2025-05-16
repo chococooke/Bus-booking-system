@@ -1,24 +1,22 @@
-const connection = require("./index.js");
-const { busTableCreation, bookingsTableCreation, paymentsTableCreation, userTableCreation } = require('./tables.js');
+const dotenv = require("dotenv");
+const { Sequelize } = require("sequelize");
 
+dotenv.config();
 
-function createTables() {
+console.log(process.env.MYSQL_UNAME);
+
+const sequelize = new Sequelize('bookingsDB', process.env.MYSQL_UNAME, process.env.MYSQL_PASSWD, {
+    host: 'localhost',
+    dialect: "mysql"
+});
+
+(async () => {
     try {
-        connection.execute(userTableCreation, () => {
-            console.log("Created user table");
-        });
-        connection.execute(busTableCreation, () => {
-            console.log("Created bus table");
-        });
-        connection.execute(bookingsTableCreation, () => {
-            console.log("Created bookings table");
-        });
-        connection.execute(paymentsTableCreation, () => {
-            console.log("Created payments table");
-        });
+        await sequelize.authenticate();
+        console.log("Connection has been established");
     } catch (err) {
-        console.log(err);
+        console.error("Unable to connect to the database", err);
     }
-}
+})();
 
-createTables();
+module.exports = sequelize;

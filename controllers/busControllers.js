@@ -1,30 +1,36 @@
-const connection = require("../index.js");
+const Bus = require("../models/Bus.js");
+const { Op } = require("sequelize");
 
-function addBus(req, res) {
-    const { id, busNumber, totalSeats, availableSeats } = req.body;
+async function addBus(req, res) {
+    const { busNumber, totalSeats, availableSeats } = req.body;
 
-    const query = `INSERT INTO bus (id, busNumber, totalSeats, availableSeats) VALUES (?, ?, ?, ?)`;
-    connection.execute(query, [id, busNumber, totalSeats, availableSeats], (err, results) => {
-        if (err) {
-            console.error("Error adding bus:", err);
-            return res.status(500).json({ error: "Failed to add bus." });
-        }
-        res.status(201).json({ message: "Bus added successfully.", busId: id });
-    });
+    try {
+        await Bus.create({ busNumber, totalSeats, availableSeats });
+        console.log("Added new bus successfully");
+        return res.send("Added new bus successfully");
+    } catch (err) {
+        console.log(err);
+        return res.send("Something went wrong");
+    }
 }
 
 
-function getAvailableSeates(req, res) {
+async function getBusesWithRequestedSeats(req, res) {
     const minSeats = parseInt(req.params.seats);
+    try {
+        const buses = await Bus.findAll({
+            where: {
+                availableSeats: {
+                    [Op.gt]: minSeats
+                }
+            }
+        });
 
-    const query = `SELECT * FROM bus WHERE availableSeats > ?`;
-    connection.execute(query, [minSeats], (err, results) => {
-        if (err) {
-            console.error(err);
-            return res.send("Something went wront");
-        }
-        res.json(results);
-    });
+        return res.json(buses);
+    } catch (err) {
+        console.log(err);
+        return res.send("Something went wrong");
+    }
 }
 
-module.exports = { getAvailableSeates, addBus };
+module.exports = { getBusesWithRequestedSeats, addBus };
